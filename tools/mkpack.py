@@ -59,6 +59,7 @@ pack = {
     'top': [conv(c) for c in root if c.tag not in ('application', 'uses-sdk')],
     'app': [conv(c) for c in app] if app is not None else [],
     'gmsVersion': gms,
+    'init': 'assets',
 }
 print('Cozulmeyen kaynak referanslari:', unresolved)
 

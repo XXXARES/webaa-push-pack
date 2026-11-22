@@ -23,6 +23,7 @@ public class PushBoot extends ContentProvider {
     public boolean onCreate() {
         final Context c = getContext();
         if (c == null) return true;
+        init(c);
         channel(c);
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
@@ -35,6 +36,29 @@ public class PushBoot extends ContentProvider {
             }
         });
         return true;
+    }
+
+    /** Firebase ayarlarini assets/webaa_push.json dosyasindan okuyup Firebase'i baslatir (resources.arsc gerekmez). */
+    static void init(Context c) {
+        try {
+            if (!com.google.firebase.FirebaseApp.getApps(c).isEmpty()) return;
+            java.io.InputStream in = c.getAssets().open("webaa_push.json");
+            java.io.ByteArrayOutputStream bo = new java.io.ByteArrayOutputStream();
+            byte[] buf = new byte[4096]; int n;
+            while ((n = in.read(buf)) > 0) bo.write(buf, 0, n);
+            in.close();
+            org.json.JSONObject j = new org.json.JSONObject(bo.toString("UTF-8"));
+            com.google.firebase.FirebaseOptions.Builder b = new com.google.firebase.FirebaseOptions.Builder()
+                    .setApplicationId(j.getString("appId"))
+                    .setApiKey(j.getString("apiKey"))
+                    .setGcmSenderId(j.getString("senderId"))
+                    .setProjectId(j.getString("projectId"));
+            String sb = j.optString("storageBucket", "");
+            if (sb.length() > 0) b.setStorageBucket(sb);
+            com.google.firebase.FirebaseApp.initializeApp(c, b.build());
+        } catch (Throwable ignored) {
+            // assets/webaa_push.json yoksa push calismaz ama uygulama acilir
+        }
     }
 
     static void channel(Context c) {
