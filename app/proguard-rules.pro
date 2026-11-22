@@ -1,0 +1,3 @@
+-dontobfuscate
+-dontwarn **
+-keep class com.webaa.pushpack.** { *; }
